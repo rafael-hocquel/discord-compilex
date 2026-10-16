@@ -1,0 +1,69 @@
+const {
+  // Si la commande requiert des paramètres
+  ApplicationCommandOptionType,
+
+  // Si la commande requiert des permissions pour être utilisée par l'utilisateur **OU** Si le bot à besoin de permission pour
+  // éxécuter la commande
+  PermissionFlagsBits,
+} = require("discord.js");
+const sendLog = require("../../utils/sendLog");
+
+module.exports = {
+  // Nom de la commande
+  name: "unmute",
+
+  // Description de la commande
+  description: "Désactive la sanction mute",
+
+  // Paramètres de la commande
+  options: [
+    {
+      name: "membre",
+      description: "Le membre banni",
+      required: true,
+      type: ApplicationCommandOptionType.User,
+    },
+  ],
+
+  // Permissions requises pour l'utilisateur éxécutant la commande
+  permissionsRequired: [PermissionFlagsBits.ManageMessages],
+
+  // Permissions requises pour que le bot puisse éxécuter la commande
+  botPermissions: [PermissionFlagsBits.Administrator],
+
+  // Action de la commande sous forme de fonction (prenant toujours ces 2 paramètres)
+  callback: async (client, interraction) => {
+    // On récupère le role Muted
+    const rolesCollection = await interraction.guild.roles.fetch();
+    const roles = Array.from(rolesCollection.values());
+    const mutedRoles = roles.filter((role) => role.name === "Muted");
+
+    // On récupère le membre mute
+    const guildMutedMember = interraction.options.getMember("membre");
+
+    // Si l'utilisateur possède le role Muted alors on lui enleve
+    try {
+      if (guildMutedMember.roles.cache.has(mutedRoles[0].id)) {
+        await guildMutedMember.roles.remove(mutedRoles[0]);
+      }
+    } catch {
+      console.log("Un problème est survenu");
+    }
+
+    // Si l'utilisateur est tempmute alors on annule la sanction
+    try {
+      await guildMutedMember.timeout(null, "Annulation du mute avant la fin");
+    } catch (error) {
+      console.error(error);
+    }
+
+    // On envoie un log de l'action dans le salon adéquat
+    sendLog(
+      interraction,
+      "Membre Unmute",
+      "Yellow",
+      `**${mutedRoles}** n'est plus mute`
+    );
+    return interraction.reply("Membre unmute avec succès");
+  },
+};
