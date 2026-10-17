@@ -1,4 +1,5 @@
 # Compilex — Bot Discord pour le BUT Informatique (IUT de Bordeaux)
+*Note : Projet réalisé avant ma prise en main de Git et importé a posteriori sur ce dépôt pour archivage (d'où l'absence d'historique de commits).*
 
 Bot Discord développé avec **discord.js** pour administrer et animer le serveur de promotion du BUT Informatique. Il regroupe les outils classiques d'administration (modération, tickets, *reaction roles*), des fonctionnalités pour les étudiants (salons de travail de groupe éphémères, alertes de notes, météo du campus) et une couche d'**automatisation grâce à Google Gemini** (auto-modération contextuelle et résumés de discussions).
 
