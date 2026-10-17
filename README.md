@@ -1,62 +1,53 @@
-# Compilex - Bot Discord pour la promotion BUT Informatique (IUT Bordeaux)
+# Compilex — Bot Discord pour le BUT Informatique (IUT de Bordeaux)
 
-Bot **Discord** en discord.js qui gère la vie d'un serveur de promo : modération,
-tickets, sondages, salons de travail de groupe, accueil des nouveaux et
-**automatisation par IA** (filtrage des messages et des liens, résumé de
-conversation).
+Bot Discord développé avec **discord.js** pour administrer et animer le serveur de promotion du BUT Informatique. Il regroupe les outils classiques d'administration (modération, tickets, *reaction roles*), des fonctionnalités pour les étudiants (salons de travail de groupe éphémères, alertes de notes, météo du campus) et une couche d'**automatisation grâce à Google Gemini** (auto-modération contextuelle et résumés de discussions).
 
-**Équipe :** Rafaël HOCQUEL · Nolan MAILLARD-GOUAS  
-**Version :** 1.0 - septembre-novembre 2025
+## Fonctionnalités automatiques (Événements & IA)
 
-## Ce que fait le bot
+Le bot tourne en tâche de fond et réagit aux événements du serveur sans nécessiter de commande :
+
+- **Auto-modération hybride (Regex + Gemini) :** Chaque message envoyé ou édité passe par un premier filtre d'expressions régulières, puis par une analyse via l'API **Gemini** pour détecter les propos problématiques. En cas d'infraction, le message est supprimé et archivé dans les logs.
+- **Analyse anti-phishing des liens :** Les URLs partagées sont inspectées par IA afin de bloquer les tentatives de phishing, arnaques ou contenus malveillants.
+- **Salons vocaux temporaires (*Join-to-Create*) :** Rejoindre le salon vocal dédié génère automatiquement un salon vocal privé au nom de l'étudiant (dans lequel l'étudiant est automatiquement déplacé), qui s'auto-détruit dès qu'il se vide.
+- **Gestion des arrivées et départs :** Message d'accueil personnalisé, attribution automatique du rôle étudiant et mise à jour en temps réel du compteur de membres dans le nom d'un salon.
+- **Rôles par réaction & Logs :** Attribution/retrait de rôles à la volée sur les messages configurés, et journalisation systématique de toutes les commandes exécutées dans un salon d'audit.
+
+## Commandes (`/slash`)
+
+### Vie étudiante & Utilitaires
+
+| Commande | Description |
+| :--- | :--- |
+| `/recap` | Génère un **résumé par IA** des 10 à 100 derniers messages du salon |
+| `/setupgroupwork` | Déploie un panneau interactif permettant aux étudiants de créer des **salons privés de travail de groupe** (participants, durée, échéance) |
+| `/sondage` | Crée un sondage interactif personnalisé (titre, description, options de vote) |
+| `/meteocampus` | Affiche les prévisions météo du campus (par jour et par heure) |
+| `/ticket` | Ouvre un salon privé avec l'équipe de modération |
+| `/setupTicket` · `/setupReactionRole` | Déploie les messages interactifs d'ouverture de tickets et d'attribution de rôles |
+| `/event` · `/note` | Publie des annonces formatées pour les événements de promo ou la sortie de nouvelles notes |
+| `/ping` · `/uptime` · `/meme` · `/needhelp` | Latence, temps de fonctionnement, meme d'info aléatoire et liens d'aide |
 
 ### Modération
 
-| Commande | Effet |
-|----------|-------|
-| `/ban` · `/kick` | Bannir ou expulser un membre |
-| `/mute` · `/tempmute` · `/unmute` | Rendre muet pour une durée, indéfiniment, ou lever la sanction |
-| `/warn` | Donner un avertissement |
-| `/lock` · `/unlock` | Fermer ou rouvrir l'écriture dans un salon |
-| `/clear` | Effacer des messages |
-| `/clone` · `/close` | Recréer un salon à l'identique, ou le fermer |
-
-### Vie du serveur
-
-| Commande | Effet |
-|----------|-------|
-| `/recap` | **Résumé IA** des 10 à 100 derniers messages du salon |
-| `/ticket` | Ouvrir un salon privé avec l'équipe de modération |
-| `/sondage` | Créer un sondage interactif (nom, description, réponses, vote) |
-| `/setupgroupwork` | Message interactif : créer un salon de **travail de groupe** privé (participants, durée, échéance) |
-| `/setupTicket` · `/setupReactionRole` · `/event` · `/note` | Messages d'installation : support, rôles par réaction, événements, nouvelles notes |
-| `/meteocampus` | Météo du campus, par jour et par heure |
-| `/ping` · `/uptime` · `/meme` · `/needhelp` | Latence, disponibilité, meme informatique aléatoire, lien d'aide |
-
-### Automatique, sans commande
-
-| Déclencheur | Réaction |
-|-------------|----------|
-| Nouveau message, ou message édité | **Double filtre** : liste d'expressions régulières puis vérification par **Gemini** → suppression et log si le message est non conforme |
-| Message contenant un lien | Analyse par IA des liens (phishing, arnaques, contenu illégal) → suppression et log |
-| Arrivée d'un membre | Message de bienvenue, ajout automatique du rôle étudiant, mise à jour du compteur de membres dans un salon |
-| Départ d'un membre | Message d'au revoir, mise à jour du compteur |
-| Réaction ajoutée ou retirée | Attribution ou retrait du rôle correspondant |
-| Arrivée dans le salon vocal dédié | Création d'un **salon vocal privé** au nom du membre, supprimé quand il se vide |
-| Chaque commande utilisée | Log dans un salon dédié |
+| Commande | Description |
+| :--- | :--- |
+| `/ban` · `/kick` | Bannir ou expulser un membre du serveur |
+| `/mute` · `/tempmute` · `/unmute` | Rendre muet (définitivement ou temporairement) ou lever la sanction |
+| `/warn` | Avertir officiellement un membre |
+| `/lock` · `/unlock` | Verrouiller ou déverrouiller l'écriture dans le salon courant |
+| `/clear` | Supprimer un nombre défini de messages |
+| `/clone` · `/close` | Dupliquer un salon à l'identique ou fermer un salon (ex. ticket résolu) |
 
 ## Prérequis
 
-- **Node.js 18 ou plus**
-- Une **application Discord** avec un bot, sur le [portail développeur](https://discord.com/developers/applications)
-- Les **intents privilégiés** activés pour le bot : *Server Members Intent* et *Message Content Intent*
-- Une clé **API Google Gemini** (résumé et modération)
+- **Node.js 18+**
+- Une application Discord avec un bot configuré sur le [Portail Développeur Discord](https://discord.com/developers/applications)
+- Les **Privileged Gateway Intents** activés sur le portail : `Server Members Intent` et `Message Content Intent`
+- Une clé **API Google Gemini** (pour la commande `/recap` et l'auto-modération)
 
-## Installation
+## Installation et lancement
 
-```
-bash
-git clone https://github.com/rafael-hocquel/compilex.git
-cd compilex
+```bash
+git clone https://github.com/rafael-hocquel/discord-compilex.git
+cd discord-compilex
 npm install
-```
